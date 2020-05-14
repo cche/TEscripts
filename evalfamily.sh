@@ -39,6 +39,9 @@ while [ "$1" != "" ]; do
     -m | --mafft )
       mafft=1
       ;;
+    -e | --erode )
+      mafft=1
+      ;;
     -h | --help )
       usage
       exit
@@ -63,3 +66,6 @@ then
   mafft --quiet --reorder --thread ${thread} ${fam}-seqs.fa > ${fam}-seqs.mft
 fi
 
+if [ erode = "1" ]
+then
+  erode_alignment.py -i ${fam}-seqs.mft -w 5 -c 0.7 -f 0.2 -o ${fam}-seqs-eroded.mft

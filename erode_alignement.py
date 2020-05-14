@@ -80,6 +80,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "-i", help="Input multialignment file in FASTA format")
     parser.add_argument(
+        "-w", help="Window size to calculate confidence and conservation")
+    parser.add_argument(
+        "-c", help="Conservation threshold 0.0 - 1.0")
+    parser.add_argument(
+        "-f", help="Confidence threshold 0.0 - 1.0")
+    parser.add_argument(
         "-o", help="New multi-alignment file")
     args = parser.parse_args()
 
@@ -87,7 +93,7 @@ if __name__ == "__main__":
     myalign = ErodeAlignment(align)
     #  print(myalign)
     # print(myalign.pretty())
-    eroded = myalign.erode(5, 0.7, 0.2)
+    eroded = myalign.erode(args.w, args.c, args.f)
     if eroded != None:
         AlignIO.write(eroded, args.o, "fasta")
     else:
