@@ -5,11 +5,35 @@ can be used to filter the lines that will be output.
 """
 
 
+def bed_from_line(line, cols, regionchrom, regionstart, regionstop):
+    """Extract columns from file and return a BED3 of BED6 line"""
+    (chrom, start, end, *dummy) = cols.split(",")
+    chrom = int(chrom) - 1
+    start = int(start) - 1
+    end = int(end) - 1
+    if dummy != []:
+        name, score, strand = dummy
+        name = int(name) - 1
+        score = int(score) - 1
+        strand = int(strand) - 1
+    else:
+        name = score = strand = -1
+
+    fields = line.strip().split('\t')
+    if name >= 0:
+        return "\t".join(
+            [fields[chrom], str(regionstart), str(regionstop),
+                fields[name], fields[score], fields[strand]])
+    else:
+        return "\t".join([fields[chrom], str(regionstart), str(regionstop)])
+
+
 def get_regions_2_bed(infile: str, columns, col: int = 0, threshold: int = 0):
     """Extract columns from tsv file with threshold for a column
     Returns: List with BED3 or BED6 formatted lines.
     """
     result = []
+
     (chrom, start, end, *dummy) = columns.split(",")
     chrom = int(chrom) - 1
     start = int(start) - 1
@@ -32,7 +56,7 @@ def get_regions_2_bed(infile: str, columns, col: int = 0, threshold: int = 0):
         col -= 1
 
     regionchrom = ''
-    regionstart = 0
+    regionstart = -1
     regionstop = 0
     inregion = False
     with open(infile) as fi:
@@ -41,15 +65,19 @@ def get_regions_2_bed(infile: str, columns, col: int = 0, threshold: int = 0):
             if threshold == 0:
                 if name >= 0:
                     result.append("\t".join(
-                        [fields[chrom], str(regionstart), str(regionstop),
+                        [fields[chrom], str(start), str(end),
                             fields[name], fields[score], fields[strand]]))
                 else:
                     result.append(
-                        "\t".join([fields[chrom], str(regionstart), str(regionstop)]))
+                        "\t".join([fields[chrom], str(start), str(end)]))
             else:
                 if fields[chrom] != regionchrom:
+                    if inregion:
+                        result.append(
+                            "\t".join([regionchrom, str(regionstart), str(regionstop)]))
                     regionchrom = fields[chrom]
-                    regionstart = 0
+                    regionstart = -1
+                    regionstop = 0
                     inregion = False
 
                 if int(fields[col]) > threshold and inregion == False:
@@ -57,16 +85,18 @@ def get_regions_2_bed(infile: str, columns, col: int = 0, threshold: int = 0):
                     inregion = True
 
                 if int(fields[col]) <= threshold and inregion:
-                    if name >= 0:
-                        result.append("\t".join(
-                            [fields[chrom], str(regionstart), str(regionstop),
-                                fields[name], fields[score], fields[strand]]))
-                    else:
-                        result.append(
-                            "\t".join([fields[chrom], str(regionstart), str(regionstop)]))
+                    result.append(
+                        "\t".join([regionchrom, str(regionstart), str(regionstop)]))
                     inregion = False
+                    regionstart = -1
+                    regionstop = 0
 
-                regionstop = fields[end]
+                if inregion:
+                    regionstop = fields[end]
+
+        if regionchrom != "" and regionstart != -1 and regionstop != 0:
+            result.append(
+                "\t".join([regionchrom, str(regionstart), str(regionstop)]))
     return result
 
 
