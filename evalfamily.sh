@@ -40,7 +40,7 @@ while [ "$1" != "" ]; do
       mafft=1
       ;;
     -e | --erode )
-      mafft=1
+      erode=1
       ;;
     -h | --help )
       usage
@@ -61,11 +61,12 @@ bedtools merge -d $flank -i ${fam}-positions.bed > ${fam}-positions-merge.bed
 
 getseq.py -i $genome -p ${fam}-positions-merge.bed -f ${flank} -o ${fam}-seqs.fa
 
-if [ mafft = "1" ]
+if [ "$mafft" = "1" ]
 then
   mafft --quiet --reorder --thread ${thread} ${fam}-seqs.fa > ${fam}-seqs.mft
+  if [ "$erode" = "1" ]
+  then
+    erode_alignment.py -i ${fam}-seqs.mft -w 5 -c 0.7 -f 0.2 -o ${fam}-seqs-eroded.mft
+  fi
 fi
 
-if [ erode = "1" ]
-then
-  erode_alignment.py -i ${fam}-seqs.mft -w 5 -c 0.7 -f 0.2 -o ${fam}-seqs-eroded.mft

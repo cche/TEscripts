@@ -93,7 +93,7 @@ if __name__ == "__main__":
     myalign = ErodeAlignment(align)
     #  print(myalign)
     # print(myalign.pretty())
-    eroded = myalign.erode(args.w, args.c, args.f)
+    eroded = myalign.erode(int(args.w), float(args.c), float(args.f))
     if eroded != None:
         AlignIO.write(eroded, args.o, "fasta")
     else:
