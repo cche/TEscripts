@@ -17,12 +17,11 @@ class NgramList():
                 NgramList.covered.append(0)
 
         self.ngrams = {}
-        for start, words in get2words(NgramList.allwords):
-            wordname = "_".join(words)
-            if wordname in self.ngrams:
-                self.ngrams[wordname].add_start(start)
+        for start, word in enumerate(NgramList.allwords):
+            if word in self.ngrams:
+                self.ngrams[word].add_start(start)
             else:
-                self.ngrams[wordname] = Ngram(2, words, start)
+                self.ngrams[word] = Ngram(word, start)
 
     def grow_ngrams(self):
         ngs = list(self.ngrams.keys())
@@ -43,7 +42,7 @@ class NgramList():
                 else:
                     ngs.remove(ng)
             #  print("ngs: ", len(ngs), more)
-            print(f"checked ngram {i}")
+            #  print(f"checked ngram {i}")
             i += 1
 
     def printNgram(self, minsize=2):
@@ -53,13 +52,13 @@ class NgramList():
 
 
 class Ngram(object):
-    def __init__(self, n, words, start):
-        self.nsize = n
-        self.words = words
+    def __init__(self, words, start):
+        self.words = [words]
         self.start = [start, ]
+        self.nsize = len(self.words)
 
     def __repr__(self):
-        return f"{self.nsize}, {self.words}, {self.start}"
+        return f"{self.nsize}\n {self.words}\n {self.start}"
 
     def get_next(self):
         newwords = Counter()
@@ -85,10 +84,10 @@ class Ngram(object):
                 100.0*newwords.most_common(1)[0][1]/len(self.start) >= 30:
             #  print("perc cov", 100.0*newwords.most_common(1)[0][1]/len(self.start))
             res = self.addNgram(newwords.most_common(1)[0][0])
-            #  for n in self.start:
-            #      #  print(newstarts[newwords.most_common(1)[0][0]])
-            #      if n not in newstarts[newwords.most_common(1)[0][0]]:
-            #          self.start.remove(n)
+            for n in self.start:
+                #  print(newstarts[newwords.most_common(1)[0][0]])
+                if n not in newstarts[newwords.most_common(1)[0][0]]:
+                    self.start.remove(n)
             return res
         else:
             return False
