@@ -27,6 +27,7 @@ class NgramList():
     def grow_ngrams(self):
         ngs = list(self.ngrams.keys())
         more = True
+        i = 3
         while len(ngs) and more:
             more = False
             for ng in ngs:
@@ -36,12 +37,14 @@ class NgramList():
                     # mark the positions in covered (list) so that we don't visit them again.
                     #  print("found longer ngram")
                     more = True
-                    for pos in ngram.start:
-                        for n in range(ngram.nsize+1):
-                            NgramList.covered[pos+n] = 1
+                    #  for pos in ngram.start:
+                    #      for n in range(ngram.nsize+1):
+                    #          NgramList.covered[pos+n] = 1
                 else:
                     ngs.remove(ng)
             #  print("ngs: ", len(ngs), more)
+            print(f"checked ngram {i}")
+            i += 1
 
     def printNgram(self, minsize=2):
         for ng in self.ngrams:
@@ -77,16 +80,15 @@ class Ngram(object):
             newstarts[nw].append(pos)
             #  except:
             #      print("error in get_next")
-        #  print(newwords.most_common(1))
-        #  print(newwords.most_common(1))
+
         if newwords.most_common(1) and \
                 100.0*newwords.most_common(1)[0][1]/len(self.start) >= 30:
             #  print("perc cov", 100.0*newwords.most_common(1)[0][1]/len(self.start))
             res = self.addNgram(newwords.most_common(1)[0][0])
-            for n in self.start:
-                #  print(newstarts[newwords.most_common(1)[0][0]])
-                if n not in newstarts[newwords.most_common(1)[0][0]]:
-                    self.start.remove(n)
+            #  for n in self.start:
+            #      #  print(newstarts[newwords.most_common(1)[0][0]])
+            #      if n not in newstarts[newwords.most_common(1)[0][0]]:
+            #          self.start.remove(n)
             return res
         else:
             return False
@@ -97,13 +99,16 @@ class Ngram(object):
     def addNgram(self, word):
         if len(self.start) < 2:
             return False
-        if self.start[0]+self.nsize+1 < self.start[1]:
-            self.nsize += 1
-            self.words += [word]
-            return True
-        else:
-            # we got a repeat element
-            return False
+        self.nsize += 1
+        self.words += [word]
+        return True
+        #  if self.start[0]+self.nsize+1 < self.start[1]:
+        #      self.nsize += 1
+        #      self.words += [word]
+        #      return True
+        #  else:
+        #      # we got a repeat element
+        #      return False
 
 
 def get2words(words):
