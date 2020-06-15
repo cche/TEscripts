@@ -13,6 +13,8 @@ usage() {
 }
 
 mafft=0
+flank=0
+thread=1
 
 while [ "$1" != "" ]; do
   case $1 in
