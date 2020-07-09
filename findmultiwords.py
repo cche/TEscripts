@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from collections import Counter
+from typing import List
 import sys
 import contextlib
 
@@ -20,8 +21,8 @@ def smart_open(filename=None):
 
 
 class NgramList:
-    allwords = []
-    covered = []
+    allwords: List[str] = []
+    covered: List[int] = []
 
     def __init__(self, file):
         # TODO Use the index (line number) as key, this will allow the elimination
@@ -29,6 +30,8 @@ class NgramList:
         self.positions = []
         with open(file) as infile:
             for line in infile:
+                if line[0] == "S" or line[0] == "s" or len(line) == 1:
+                    continue
                 fields = line.strip().split("\t")
                 self.positions.append([fields[4], fields[5], fields[6]])
                 word = fields[9]
@@ -105,69 +108,50 @@ class NgramList:
         print(f"number of ngrams: {len(self.ngrams)}")
         print(f"longest ngram: {maxlen}")
 
-    def writeNgrams(self, file=None, minsize=2, maxsize=None):
-        with smart_open(file) as infile:
-            for ng in self.ngrams:
-                if len(self.ngrams[ng].start) < 2:
-                    continue
-                if self.ngrams[ng].nsize >= minsize:
-                    #  print(minsize, maxsize)
-                    if maxsize:
-                        if self.ngrams[ng].nsize <= maxsize:
-                            print(self.ngrams[ng], file=infile)
-                            for st in self.ngrams[ng].start:
-                                regstart = min(
-                                    [
-                                        p[1]
-                                        for p in self.positions[
-                                            st : st + self.ngrams[ng].nsize + 1
-                                        ]
-                                    ]
-                                )
-                                regstop = max(
-                                    [
-                                        p[2]
-                                        for p in self.positions[
-                                            st : st + self.ngrams[ng].nsize + 1
-                                        ]
-                                    ]
-                                )
-                                print(
-                                    "\t".join(
-                                        [self.positions[st][0], regstart, regstop]
-                                    ),
-                                    file=infile,
-                                )
-                    else:
-                        print(self.ngrams[ng], file=infile)
-                        for st in self.ngrams[ng].start:
-                            regstart = min(
-                                [
-                                    p[1]
-                                    for p in self.positions[
-                                        st : st + self.ngrams[ng].nsize + 1
-                                    ]
+    def writeNgrams(self, file="candidate", minsize=2, maxsize=None):
+        nn = 0
+        for ng in self.ngrams:
+            if len(self.ngrams[ng].start) < 2:
+                continue
+            if self.ngrams[ng].nsize >= minsize:
+                if maxsize:
+                    if self.ngrams[ng].nsize > maxsize:
+                        continue
+                nn += 1
+                with open(file + "-" + str(nn) + ".txt", "w") as fileout:
+                    print(nn, self.ngrams[ng].words)
+                    fileout.write("Pattern: " + " ".join(self.ngrams[ng].words) + "\n")
+                    fileout.write(
+                        "Start Lines: "
+                        + " ".join([str(x) for x in self.ngrams[ng].start])
+                        + "\n"
+                    )
+                with open(file + "-" + str(nn) + ".bed", "w") as bedout:
+                    for st in self.ngrams[ng].start:
+                        regstart = min(
+                            [
+                                p[1]
+                                for p in self.positions[
+                                    st : st + self.ngrams[ng].nsize + 1
                                 ]
-                            )
-                            regstop = max(
-                                [
-                                    p[2]
-                                    for p in self.positions[
-                                        st : st + self.ngrams[ng].nsize + 1
-                                    ]
+                            ]
+                        )
+                        regstop = max(
+                            [
+                                p[2]
+                                for p in self.positions[
+                                    st : st + self.ngrams[ng].nsize + 1
                                 ]
-                            )
-                            print(
-                                "\t".join([self.positions[st][0], regstart, regstop]),
-                                file=infile,
-                            )
+                            ]
+                        )
+                        bedout.write(
+                            "\t".join([self.positions[st][0], regstart, regstop]) + "\n"
+                        )
 
 
 class Ngram(object):
     def __init__(self, words, start):
-        self.words = [
-            words,
-        ]
+        self.words = [w for w in words]
         self.start = [
             start,
         ]
@@ -213,12 +197,12 @@ class Ngram(object):
     def addNgram(self, word):
         if len(self.start) < 2:
             self.nsize += 1
-            self.words += [word]
+            self.words.append(word)
             return True
         for i in range(len(self.start) - 1):
             if self.start[i] + self.nsize + 1 < self.start[i + 1]:
                 self.nsize += 1
-                self.words += [word]
+                self.words.append(word)
                 return True
             else:
                 # we got a repeat element
@@ -248,4 +232,4 @@ if __name__ == "__main__":
     NG = NgramList(args.i)
     NG.grow_ngrams(10)
     #  NG.clean_overlapping()
-    NG.writeNgrams(args.o, 3, 4)
+    NG.writeNgrams(args.o, 5, 8)
