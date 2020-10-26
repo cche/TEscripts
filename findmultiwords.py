@@ -145,7 +145,7 @@ class NgramList:
                             ]
                         )
                         bedout.write(
-                            "\t".join([self.positions[st][0], regstart, regstop]) + "\n"
+                            "\t".join([self.positions[st][0], regstart, regstop]) + "\n\n"
                         )
 
 
@@ -232,4 +232,4 @@ if __name__ == "__main__":
     NG = NgramList(args.i)
     NG.grow_ngrams(10)
     #  NG.clean_overlapping()
-    NG.writeNgrams(args.o, 5, 8)
+    NG.writeNgrams(args.o, 3, 8)
