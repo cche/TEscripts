@@ -57,7 +57,7 @@ done
 
 # grep -E "\b${fam}\b" $gff | cut -f 1,4,5 > ${fam}-positions.bed
 sed -i~ -e 's/ \+/\t/g' $annot
-awk 'OFS="\t" {if ($10 == fam) {print $5,$6,$7}}' fam=$fam $annot > ${fam}-positions.bed
+awk 'OFS="\t" {if ($10 == $fam) {print $5,$6,$7}}' fam=$fam $annot > ${fam}-positions.bed
 
 bedtools merge -d $flank -i ${fam}-positions.bed > ${fam}-positions-merge.bed
 

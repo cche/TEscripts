@@ -24,7 +24,7 @@ The column positions are given in a specific order corresponding to a BED3 or BE
 file depending on the data available and the output that you want.
 
 
-The order is **chrom,start,end[,name,score,strand]** and, as ilustrated, should not
+The order is **chrom,start,end[,name,score,strand]** and, as illustrated, should not
 have spaces i.e. -p 2,4,5 or -p 2,4,5,6,8,10. Be sure to give either 3 or 6 column
 numbers.
 
@@ -32,10 +32,51 @@ The numerical column that is used to filter the output does not need to be one o
 the output columns. The program will merge contiguous reported region that
 are above the given threshold.
 
+### Output
+
+This script will produce a BED with Chromosome, star and end position or a BED6 which will include
+the name, score and strand position.
+
 ### Example usage
 
 After a bedtools multicov using a RepeatMasker gff annotation file and several bam files
 I used this script to identify genomic regions enriched in expressed Transposable elements.
 ```bash
 python3 getregions.py -i repeats-rnaseq2.csv -p "1,4,5" -c 10 -t 50 -o repeats-expressed-50.bed
+```
+
+## evalfamily.sh
+
+### Description
+
+Take a RepeatMasker .out file and extract all loci for a given family with a given flanking region,
+merge overlapping regions, extract the sequences, align and produce a cleaned alignment.
+
+### Usage
+
+    Usage: evalfamily.sh OPTIONS
+
+      OPTIONS:
+      -g|--genome FILE  Fasta genome file 
+      -a|--annot   FILE  Annotation gff file 
+      -n|--name   TEXT  TE Family name 
+      -f|--flank  NUM   Flanking bases 
+      -t|--thread NUM   Number of threads 
+      [-m|--mafft]      Align with Mafft
+      [-e|--erode]      Erode the borders of the alignment
+
+### Output
+
+It produces:
+- Fasta File with the elements and flanking regions
+- Alignment file in fasta format (*.mft)
+- Alignment file without the unaligned beginning and end.
+
+### Example usage
+
+Use the fasta file to inspect with a dotplot program like Gepard (ref here).
+Inspect the correct borders and produce a consensus sequence by inspecting the alignment files.
+
+```bash
+evalfamily.sh -g mygenome.fa -n rnd-1_family-1 -a mygenome.fa.out -f 500 -t 10 -m -e
 ```
