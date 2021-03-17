@@ -100,8 +100,8 @@ class NgramList:
                         ng1.words += ng2.words[:-diff]
                         ng1.nsize += diff
                 else:
+                    i = j
                     break
-            i = j
 
     def stats(self):
         maxlen = max([self.ngrams[n].nsize for n in self.ngrams])
@@ -145,7 +145,8 @@ class NgramList:
                             ]
                         )
                         bedout.write(
-                            "\t".join([self.positions[st][0], regstart, regstop]) + "\n\n"
+                            "\t".join([self.positions[st][0], regstart, regstop])
+                            + "\n\n"
                         )
 
 
