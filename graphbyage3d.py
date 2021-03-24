@@ -67,7 +67,8 @@ if __name__ == "__main__":
         dx = dy = 0.5 * np.ones_like(zpos)
         dz = hist.ravel()
 
-        ax.bar3d(xpos, ypos, zpos, dx, dy, dz, zsort="average")
+        ax.view_init(elev=None, azim=-25)
+        ax.bar3d(xpos, ypos, zpos, dx, dy, dz, zsort="average", shade=True)
         # plt.subplots_adjust(
         # top=0.92, bottom=0.05, left=0.10, right=0.95, hspace=0.7, wspace=0.45
         # )
