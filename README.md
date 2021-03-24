@@ -80,3 +80,96 @@ Inspect the correct borders and produce a consensus sequence by inspecting the a
 ```bash
 evalfamily.sh -g mygenome.fa -n rnd-1_family-1 -a mygenome.fa.out -f 500 -t 10 -m -e
 ```
+
+
+## correct\_one-code\_with-name.py
+
+
+### Description
+
+The script takes a one_code_to_find_them_all.pl output file and will rename LTR elements
+according to the internal part that was identified. If no internal part is found the name
+will be taken from the LTR part. The name is stripped of \_I and \_LTR parts so that the LTR
+family name is used. It also eliminates duplicate lines identified as different parts of
+non autonomous elements. This helps with downstream processing.
+
+### Usage
+
+    usage: correct_one-code_with-name.py [-h] [-i I] [-o O]
+    
+    Parse one-code output and eliminate lines that are contained in previously identified loci
+    
+    optional arguments:
+      -h, --help  show this help message and exit
+      -i I        One code output file
+      -o O        Output file name
+
+### Output
+
+The output file resembles the one_code_to_find_them_all output but has the names of LTR elements
+changed to the family name without the \_I or \_LTR suffixes and the duplicated lines deleted.
+
+### Example usage
+```bash
+python3 correct_one-code_with-name.py -i one_code_output.csv -o one_code_output-corrected.csv
+```
+
+
+## graphbyage3d.py
+
+### Description
+
+Graphs the 3d histogram of percentage of divergence and percentage of completeness with respect
+to the representative element of the family.
+
+### Usage
+
+    usage: graphbyage3d.py [-h] [-i I] [-b B] [-s S] [-f F] [-o O]
+    
+    Parse RepeatMasker .out file and graph percent similarity by repeat family
+    
+    optional arguments:
+      -h, --help  show this help message and exit
+      -i I        Onecode .elem_sorted.csv file
+      -b B        Number of bins
+      -s S        Size of image in WxH in inches
+      -f F        Class to filter
+      -o O        Filename for graph
+
+### Output
+
+Creates a PNG image of the TE element given in the command line (-f)
+
+### Example usage
+```bash
+python3 graphbyage3d.py -i onecode-corrected-output.csv -b 20 -s 9x9 -f SACI5 -o saci5.png
+```
+
+
+## graphbycontour.py
+
+### Description
+Graphs a 2d histogram of percentage of divergence and percentage of completeness with respect
+to the representative element of the family with the histogram values being color coded.
+
+### Usage
+
+    usage: graphbycontour.py [-h] [-i I] [-b B] [-s S] [-f F] [-o O]
+    
+    Parse RepeatMasker .out file and graph percent similarity by repeat family
+    
+    optional arguments:
+      -h, --help  show this help message and exit
+      -i I        Onecode .elem_sorted.csv file
+      -b B        Number of bins
+      -s S        Size of image in WxH format (inches)
+      -f F        Class to filter
+      -o O        Filename for graph
+
+### Output
+Creates a PNG image of the TE element given in the command line (-f)
+
+### Example usage
+```bash
+python3 graphbycontour.py -i onecode-corrected-output.csv -b 20 -s 9x9 -f SACI5 -o saci5.png
+```
