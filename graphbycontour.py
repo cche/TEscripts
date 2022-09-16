@@ -11,10 +11,7 @@ def parse_file(filename):
     lines = []
     with open(filename) as fi:
         header = fi.readline()
-        for line in fi:
-            if not line.startswith("###"):
-                continue
-            lines.append(line)
+        lines.extend(line for line in fi if line.startswith("###"))
     return lines
 
 

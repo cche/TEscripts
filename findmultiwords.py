@@ -8,11 +8,7 @@ import contextlib
 
 @contextlib.contextmanager
 def smart_open(filename=None):
-    if filename and filename != "-":
-        fh = open(filename, "w")
-    else:
-        fh = sys.stdout
-
+    fh = open(filename, "w") if filename and filename != "-" else sys.stdout
     try:
         yield fh
     finally:
@@ -104,7 +100,7 @@ class NgramList:
                     break
 
     def stats(self):
-        maxlen = max([self.ngrams[n].nsize for n in self.ngrams])
+        maxlen = max(self.ngrams[n].nsize for n in self.ngrams)
         print(f"number of ngrams: {len(self.ngrams)}")
         print(f"longest ngram: {maxlen}")
 
@@ -114,11 +110,10 @@ class NgramList:
             if len(self.ngrams[ng].start) < 2:
                 continue
             if self.ngrams[ng].nsize >= minsize:
-                if maxsize:
-                    if self.ngrams[ng].nsize > maxsize:
-                        continue
+                if maxsize and self.ngrams[ng].nsize > maxsize:
+                    continue
                 nn += 1
-                with open(file + "-" + str(nn) + ".txt", "w") as fileout:
+                with open(f"{file}-{nn}.txt", "w") as fileout:
                     print(nn, self.ngrams[ng].words)
                     fileout.write("Pattern: " + " ".join(self.ngrams[ng].words) + "\n")
                     fileout.write(
@@ -126,24 +121,22 @@ class NgramList:
                         + " ".join([str(x) for x in self.ngrams[ng].start])
                         + "\n"
                     )
-                with open(file + "-" + str(nn) + ".bed", "w") as bedout:
+                with open(f"{file}-{nn}.bed", "w") as bedout:
                     for st in self.ngrams[ng].start:
                         regstart = min(
-                            [
-                                p[1]
-                                for p in self.positions[
-                                    st : st + self.ngrams[ng].nsize + 1
-                                ]
+                            p[1]
+                            for p in self.positions[
+                                st : st + self.ngrams[ng].nsize + 1
                             ]
                         )
+
                         regstop = max(
-                            [
-                                p[2]
-                                for p in self.positions[
-                                    st : st + self.ngrams[ng].nsize + 1
-                                ]
+                            p[2]
+                            for p in self.positions[
+                                st : st + self.ngrams[ng].nsize + 1
                             ]
                         )
+
                         bedout.write(
                             "\t".join([self.positions[st][0], regstart, regstop])
                             + "\n\n"
@@ -152,7 +145,7 @@ class NgramList:
 
 class Ngram(object):
     def __init__(self, words, start):
-        self.words = [w for w in words]
+        self.words = list(words)
         self.start = [
             start,
         ]
@@ -187,8 +180,7 @@ class Ngram(object):
                 #  print(newstarts[newwords.most_common(1)[0][0]])
                 if n not in newstarts[newwords.most_common(1)[0][0]]:
                     self.start.remove(n)
-            res = self.addNgram(newwords.most_common(1)[0][0])
-            return res
+            return self.addNgram(newwords.most_common(1)[0][0])
         else:
             return False
 
@@ -217,7 +209,7 @@ def getNwords(words, n):
 
 
 def are_overlapping(r, s):
-    return not (r[1] < s[0] or s[1] < r[0])
+    return r[1] >= s[0] and s[1] >= r[0]
 
 
 if __name__ == "__main__":
