@@ -50,11 +50,10 @@ class ErodeAlignment(object):
                 continue
 
             conservs = self.conservation[pos:pos+win]
-            if sum(conservs)/len(conservs) >= cons_threshold:
-                if not inregion:
-                    inregion = True
-                    self.erodestart = pos
-                    break
+            if sum(conservs) / len(conservs) >= cons_threshold and not inregion:
+                inregion = True
+                self.erodestart = pos
+                break
 
         inregion = False
         for pos in reversed(range(win, self.alignlen)):
@@ -63,11 +62,10 @@ class ErodeAlignment(object):
                 continue
 
             conservs = self.conservation[pos-win:pos]
-            if sum(conservs)/len(conservs) >= cons_threshold:
-                if not inregion:
-                    inregion = True
-                    self.erodeend = pos
-                    break
+            if sum(conservs) / len(conservs) >= cons_threshold and not inregion:
+                inregion = True
+                self.erodeend = pos
+                break
 
         if self.erodestart != -1:
             return self.align[:, self.erodestart:self.erodeend]

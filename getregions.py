@@ -47,10 +47,7 @@ def get_regions_2_bed(infile: str, columns, col: int = 0, threshold: int = 0):
         name = score = strand = -1
 
     if col == 0:
-        if score == -1:
-            col = start
-        else:
-            col = score
+        col = start if score == -1 else score
         threshold = 0
     else:
         col -= 1

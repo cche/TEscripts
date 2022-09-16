@@ -40,23 +40,17 @@ with open(options.i) as fi:
             header = line
             continue
         supportlines = []
-        if line.startswith("###"):
-            numparts = len(line.split("\t")[0].split("/"))
-            if numparts > 1:
-                for _ in range(numparts):
-                    supportlines.append(fi.readline())
-            newelem = Element(line, supportlines)
-        else:
+        if not line.startswith("###"):
             continue
 
+        numparts = len(line.split("\t")[0].split("/"))
+        if numparts > 1:
+            supportlines.extend(fi.readline() for _ in range(numparts))
+        newelem = Element(line, supportlines)
         if newelem.chrom not in chroms:
-            chroms[newelem.chrom] = []
+            chroms[newelem.chrom] = [newelem]
+        elif not newelem.containedIn(chroms[newelem.chrom][-1]):
             chroms[newelem.chrom].append(newelem)
-        else:
-            if newelem.containedIn(chroms[newelem.chrom][-1]):
-                continue
-            else:
-                chroms[newelem.chrom].append(newelem)
 
 # Produce output
 with open(options.o, "w") as fo:
